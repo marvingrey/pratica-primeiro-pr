@@ -1,6 +1,6 @@
 # Prática Primeiro PR
 
-Este é um repositório de teste para aprender o fluxxo de Pull Requests no GitHub.
+Este é um repositório de teste para aprender o fluxo de Pull Requests no GitHub.
 
 ## Objetivo
 
