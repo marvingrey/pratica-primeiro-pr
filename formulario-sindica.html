@@ -63,6 +63,13 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,select:focus-vis
 .thumb .doc{aspect-ratio:4/3;border-radius:6px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:500 13px var(--mono)}
 .thumb .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .thumb button{justify-self:start}
+.known{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px}
+.known summary{cursor:pointer;font-weight:600}
+.known dl{display:grid;gap:8px;margin:12px 0}
+.known dl div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:4px 12px}
+@media (max-width:480px){.known dl div{grid-template-columns:1fr}}
+.known dt{font-size:14px;color:var(--muted)}
+.known dd{margin:0;font-size:15px}
 .tbl{display:grid;gap:10px}
 .trow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .trow .field{gap:4px}
@@ -87,10 +94,11 @@ button:disabled{opacity:.55;cursor:default}
   <header>
     <div class="eyebrow">Residencial Vila Formosa · App do condomínio</div>
     <h1>Formulário para a síndica</h1>
-    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas e guarda de documentos. Inclui controle do caixa, manutenções programadas, projetos futuros e a lista de moradores. Leva cerca de 25 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
+    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas e guarda de documentos. Parte das perguntas já foi respondida pelo Marcos e aparece logo abaixo. Faltam dados que só a síndica tem, como valores, caixa, manutenções e a lista de moradores. Leva cerca de 15 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
     <div class="status"><span class="pill" id="saveState">Carregando…</span><span id="progressTxt">0 de 0 perguntas respondidas</span></div>
     <div class="notice" id="offlineNote" hidden>Neste acesso as respostas ficam salvas só neste aparelho. Ao terminar, toque em <b>Copiar respostas</b> e envie o texto para o Marcos pelo WhatsApp. Documentos podem ir junto pelo WhatsApp ou por um link do Google Drive.</div>
   </header>
+  <details class="known" id="known" open><summary>Já sabemos (respondido pelo Marcos)</summary><dl id="knownList"></dl><p class="hint">Se algo estiver errado, corrija no campo "Algo mais que devemos saber?" no final.</p></details>
   <nav class="rail" id="rail" aria-label="Seções do formulário"></nav>
   <form id="form" novalidate></form>
 </div>
@@ -104,101 +112,89 @@ button:disabled{opacity:.55;cursor:default}
 
 <script>
 const OPT_SN=["Sim","Não"];
+const PRESET=[
+ ["Portaria","Não há portaria"],
+ ["Elevador","Não tem"],
+ ["Espaços e equipamentos","Garagem, jardim / áreas verdes, caixa d'água / bombas, portão eletrônico, interfone"],
+ ["Administradora","Não tem. A síndica faz a contabilidade."],
+ ["Contato com a síndica hoje","Grupo de WhatsApp"],
+ ["Prestação de contas","Mensal, feita pela síndica e enviada no WhatsApp. Sem aprovação formal."],
+ ["No app","Saldo em caixa visível para todos; inadimplência só em percentual geral"],
+ ["Gráficos e listas","Receitas x despesas por mês, gastos por categoria, fundo de reserva, lançamentos com comprovante, orçamento anual"],
+ ["Pagamento da taxa","Boleto"],
+ ["Documentos no app","Colocados pela síndica e um morador ajudante"],
+ ["Acesso ao app","Código por apartamento"],
+ ["Outras funções","Calendário (assembleias, manutenções) e enquetes simples"],
+ ["Visual","Sem logotipo; estilo acolhedor, de vizinhança"]
+];
 const SECTIONS=[
  {id:"condominio",title:"O condomínio",intro:"Dados básicos que aparecem na tela inicial do app.",fields:[
   {id:"nome_oficial",label:"Nome oficial (como está na convenção)",type:"text",ph:"Residencial Vila Formosa"},
   {id:"cnpj",label:"CNPJ do condomínio",type:"text",ph:"00.000.000/0000-00"},
   {id:"endereco",label:"Endereço completo",type:"text",ph:"Rua, número, bairro, cidade"},
-  {row:[{id:"blocos",label:"Nº de blocos",type:"number"},{id:"unidades",label:"Nº de apartamentos",type:"number"},{id:"andares",label:"Andares por bloco",type:"number"},{id:"ano",label:"Ano de entrega do prédio",type:"number"}]},
-  {id:"portaria",label:"Portaria",type:"radio",opts:["24 horas","Horário comercial","Remota / virtual","Não há portaria"]},
-  {id:"elevador",label:"Tem elevador?",type:"radio",opts:OPT_SN},
-  {id:"espacos",label:"Espaços e equipamentos do condomínio",hint:"Ajuda a organizar as fotos e os registros de manutenção.",type:"checks",opts:["Hall de entrada","Garagem","Jardim / áreas verdes","Playground","Salão","Churrasqueira","Elevador","Caixa d'água / bombas","Lixeira","Portão eletrônico","Câmeras (CFTV)","Interfone"]}
+  {row:[{id:"blocos",label:"Nº de blocos",type:"number"},{id:"unidades",label:"Nº de apartamentos",type:"number"},{id:"andares",label:"Andares por bloco",type:"number"},{id:"ano",label:"Ano de entrega do prédio",type:"number"}]}
  ]},
- {id:"gestao",title:"Gestão",intro:"Quem administra e como os moradores falam com a gestão.",fields:[
+ {id:"gestao",title:"Gestão",intro:"Quem cuida do condomínio.",fields:[
   {row:[{id:"sindica_nome",label:"Nome da síndica",type:"text"},{id:"mandato_fim",label:"Fim do mandato atual",type:"date"}]},
   {id:"subsindico",label:"Subsíndico(a), se houver",type:"text"},
-  {id:"conselho",label:"Conselho fiscal / consultivo",hint:"Nomes e apartamentos.",type:"textarea"},
-  {id:"administradora",label:"O condomínio tem administradora?",type:"radio",opts:OPT_SN},
-  {id:"administradora_nome",label:"Nome da administradora",type:"text",ph:"Se houver"},
-  {id:"contabilidade",label:"Quem faz a contabilidade?",type:"radio",opts:["Administradora","Contador(a) contratado","A própria síndica","Ninguém formalmente"]},
-  {id:"canais",label:"Como os moradores falam com a síndica hoje?",type:"checks",opts:["WhatsApp individual","Grupo de WhatsApp","E-mail","Livro de ocorrências","Pessoalmente","Bilhete na portaria"]},
-  {id:"contato_publico",label:"Contato da gestão que pode aparecer no app",hint:"Telefone ou e-mail. Deixe em branco se preferir não mostrar.",type:"text"}
+  {id:"conselho",label:"Conselho fiscal / consultivo, se houver",hint:"Nomes e apartamentos.",type:"textarea"},
+  {id:"ajudante",label:"Morador que vai ajudar a colocar documentos no app",type:"text"},
+  {id:"contato_publico",label:"Contato da síndica que pode aparecer no app",hint:"Telefone ou e-mail. Deixe em branco se preferir não mostrar.",type:"text"}
  ]},
- {id:"contas",title:"Prestação de contas",intro:"A parte principal do app. Queremos mostrar para onde vai o dinheiro de forma clara.",fields:[
-  {id:"periodicidade",label:"Com que frequência as contas são prestadas?",type:"radio",opts:["Mensal","Bimestral","Trimestral","Semestral","Anual"]},
-  {id:"elaborada_por",label:"Quem elabora a prestação de contas?",type:"radio",opts:["Síndica","Administradora","Contador(a)","Conselho fiscal"]},
-  {id:"formato_atual",label:"Como é divulgada hoje?",type:"checks",opts:["Balancete em PDF","Planilha (Excel)","Papel no mural","Enviada no WhatsApp","Só na assembleia","Não há divulgação regular"]},
-  {id:"aprovacao",label:"Quem aprova as contas?",type:"radio",opts:["Conselho fiscal","Assembleia","Conselho e assembleia","Não há aprovação formal"]},
+ {id:"contas",title:"Prestação de contas",intro:"A parte principal do app: mostrar para onde vai o dinheiro de forma clara.",fields:[
   {row:[{id:"taxa_valor",label:"Taxa condominial (R$/mês)",type:"text",ph:"Ex.: 350,00"},{id:"fundo_reserva",label:"Fundo de reserva",type:"text",ph:"Ex.: 10% da taxa"}]},
   {id:"taxa_obs",label:"A taxa varia por apartamento?",hint:"Ex.: cobertura paga mais, rateio por fração ideal, taxa extra em andamento.",type:"textarea"},
-  {id:"receitas",label:"Outras receitas além da taxa",type:"checks",opts:["Multas e juros","Taxa extra / rateio","Rendimento de aplicação","Aluguel de espaço ou antena","Venda de recicláveis","Nenhuma"]},
-  {id:"despesas",label:"Principais despesas",type:"checks",opts:["Água e esgoto (Copasa)","Energia (Cemig)","Limpeza","Portaria / vigilância","Funcionários e encargos","Manutenção de elevador","Bombas e caixa d'água","Jardinagem","Dedetização","Seguro do prédio","Administradora","Contador(a)","Obras e reformas","Material de limpeza","Tarifas bancárias"]},
+  {id:"receitas",label:"Outras receitas além da taxa",type:"checks",opts:["Multas e juros","Taxa extra / rateio","Rendimento de aplicação","Venda de recicláveis","Nenhuma"]},
+  {id:"despesas",label:"Principais despesas",type:"checks",opts:["Água e esgoto (Copasa)","Energia (Cemig)","Limpeza","Funcionários e encargos","Bombas e caixa d'água","Portão eletrônico / interfone","Jardinagem","Dedetização","Seguro do prédio","Obras e reformas","Material de limpeza","Tarifas bancárias / boletos"]},
   {id:"despesas_outras",label:"Outras despesas fixas",type:"text"},
-  {id:"mostrar_saldo",label:"Mostrar o saldo em caixa no app?",type:"radio",opts:["Sim, para todos","Só para o conselho","Não"]},
-  {id:"inadimplencia",label:"Como tratar a inadimplência no app?",hint:"Pela LGPD, o app não deve expor quais apartamentos estão devendo.",type:"radio",opts:["Mostrar só o percentual geral","Não mostrar"]},
   {id:"historico_desde",label:"Desde quando há prestação de contas para colocar no app?",type:"text",ph:"Ex.: janeiro de 2024"},
-  {id:"visualizacoes",label:"O que seria mais útil para os moradores verem?",type:"checks",opts:["Receitas x despesas por mês","Gastos por categoria","Evolução do fundo de reserva","Comparação com o ano anterior","Lista de lançamentos com comprovante","Previsão de gastos (orçamento anual)"]},
   {id:"contas_obs",label:"Observações sobre as contas",type:"textarea"}
  ]},
  {id:"caixa",title:"Controle do caixa",intro:"Como o dinheiro do condomínio é guardado e movimentado no dia a dia.",fields:[
-  {id:"banco",label:"Banco da conta do condomínio",hint:"Só o nome do banco. Não informe agência, conta ou senha.",type:"text",ph:"Ex.: Caixa, Banco do Brasil, Inter"},
-  {id:"contas_separadas",label:"Quais contas ou fundos existem?",type:"checks",opts:["Conta corrente principal","Fundo de reserva em conta separada","Aplicação / poupança","Fundo de obras","Caixinha em dinheiro (fundo fixo)"]},
-  {id:"quem_movimenta",label:"Quem movimenta a conta?",type:"radio",opts:["Só a síndica","Síndica e subsíndico(a)","Administradora","Exige duas assinaturas"]},
-  {id:"registro_mov",label:"Como entradas e saídas são registradas hoje?",type:"radio",opts:["Planilha","Sistema da administradora","Caderno / livro caixa","Só pelo extrato do banco","Não há registro"]},
-  {id:"conciliacao",label:"Com que frequência o extrato é conferido com os lançamentos?",type:"radio",opts:["Semanal","Mensal","Só na prestação de contas","Não é feito"]},
-  {id:"forma_pagto",label:"Como os moradores pagam a taxa?",type:"checks",opts:["Boleto","Pix","Depósito / transferência","Débito automático","Dinheiro"]},
-  {id:"vencimento",label:"Dia de vencimento da taxa",type:"number"},
-  {id:"multa_juros",label:"Multa e juros por atraso",type:"text",ph:"Ex.: 2% de multa + 1% ao mês"},
-  {id:"aprovacao_gasto",label:"Gastos acima de qual valor precisam de aprovação do conselho ou assembleia?",type:"text",ph:"Ex.: R$ 2.000,00"},
+  {id:"banco",label:"Banco da conta e dos boletos",hint:"Só o nome do banco. Não informe agência, conta ou senha.",type:"text",ph:"Ex.: Caixa, Banco do Brasil, Inter"},
+  {id:"contas_separadas",label:"Quais contas ou fundos existem?",type:"checks",opts:["Conta corrente principal","Fundo de reserva em conta separada","Aplicação / poupança","Fundo de obras","Caixinha em dinheiro"]},
+  {id:"quem_movimenta",label:"Quem movimenta a conta?",type:"radio",opts:["Só a síndica","Síndica e subsíndico(a)","Exige duas assinaturas"]},
+  {id:"registro_mov",label:"Como entradas e saídas são registradas hoje?",type:"radio",opts:["Planilha","Caderno / livro caixa","Aplicativo","Só pelo extrato do banco"]},
+  {row:[{id:"vencimento",label:"Dia de vencimento do boleto",type:"number"},{id:"multa_juros",label:"Multa e juros por atraso",type:"text",ph:"Ex.: 2% + 1% ao mês"}]},
+  {id:"aprovacao_gasto",label:"Existe um valor a partir do qual o gasto precisa ser combinado com os moradores?",type:"text",ph:"Ex.: acima de R$ 2.000,00"},
   {id:"caixa_obs",label:"Observações sobre o caixa",type:"textarea"}
  ]},
- {id:"manutencao",title:"Manutenções programadas",intro:"Serviços que se repetem. O app vai lembrar as datas e guardar o registro de cada execução.",fields:[
-  {id:"manut_lista",label:"Manutenções do condomínio",hint:"Já deixamos as mais comuns. Apague as que não se aplicam e acrescente outras.",type:"table",addLabel:"Adicionar manutenção",
+ {id:"manutencao",title:"Manutenções programadas",intro:"Serviços que se repetem. O app vai lembrar as datas no calendário e guardar o registro de cada execução.",fields:[
+  {id:"manut_lista",label:"Manutenções do condomínio",hint:"Já deixamos as mais prováveis para o prédio. Apague as que não se aplicam e acrescente outras.",type:"table",addLabel:"Adicionar manutenção",
    cols:[{id:"item",label:"Serviço",type:"text"},{id:"freq",label:"Frequência",type:"select",opts:["","Mensal","Trimestral","Semestral","Anual","A cada 5 anos","Quando necessário"]},{id:"prestador",label:"Empresa / prestador",type:"text"},{id:"ultima",label:"Última vez feita",type:"text",ph:"mês/ano"}],
-   seed:["Limpeza da caixa d'água","Dedetização / desratização","Manutenção do elevador","Recarga dos extintores","Manutenção das bombas","Manutenção do portão eletrônico","Inspeção do para-raios (SPDA)","Renovação do AVCB","Limpeza de calhas e telhado","Jardinagem"].map(item=>({item}))},
+   seed:["Limpeza da caixa d'água","Manutenção das bombas","Manutenção do portão eletrônico","Manutenção do interfone","Jardinagem","Dedetização / desratização","Recarga dos extintores","Inspeção do para-raios (SPDA)","Renovação do AVCB","Limpeza de calhas e telhado"].map(item=>({item}))},
   {id:"manut_obs",label:"Algum serviço atrasado ou com problema hoje?",type:"textarea"}
  ]},
  {id:"projetos",title:"Projetos futuros",intro:"Obras e melhorias planejadas. O app vai mostrar o andamento e quanto já foi arrecadado.",fields:[
   {id:"proj_lista",label:"Projetos planejados ou em discussão",type:"table",addLabel:"Adicionar projeto",
-   cols:[{id:"nome",label:"Projeto",type:"text",ph:"Ex.: Pintura da fachada"},{id:"prioridade",label:"Prioridade",type:"select",opts:["","Alta","Média","Baixa"]},{id:"custo",label:"Custo estimado (R$)",type:"text"},{id:"prazo",label:"Previsão",type:"text",ph:"mês/ano"},{id:"situacao",label:"Situação",type:"select",opts:["","Ideia","Orçando","Aprovado em assembleia","Arrecadando","Em execução"]}],
+   cols:[{id:"nome",label:"Projeto",type:"text",ph:"Ex.: Pintura da fachada"},{id:"prioridade",label:"Prioridade",type:"select",opts:["","Alta","Média","Baixa"]},{id:"custo",label:"Custo estimado (R$)",type:"text"},{id:"prazo",label:"Previsão",type:"text",ph:"mês/ano"},{id:"situacao",label:"Situação",type:"select",opts:["","Ideia","Orçando","Combinado com os moradores","Arrecadando","Em execução"]}],
    seed:[{}]},
-  {id:"proj_recursos",label:"Como os projetos são pagos?",type:"checks",opts:["Fundo de reserva","Fundo de obras","Taxa extra / rateio","Ainda não definido"]},
-  {id:"proj_obs",label:"Observações sobre os projetos",type:"textarea"}
+  {id:"proj_recursos",label:"Como os projetos são pagos?",type:"checks",opts:["Fundo de reserva","Fundo de obras","Taxa extra / rateio","Ainda não definido"]}
  ]},
- {id:"docs",title:"Documentos e registros",intro:"O app terá um arquivo digital do condomínio, organizado por tipo e data.",fields:[
-  {id:"docs_existentes",label:"Quais documentos existem e podem ir para o app?",type:"checks",opts:["Convenção","Regimento interno","Atas de assembleia","Editais de convocação","Balancetes mensais","Notas fiscais e recibos","Orçamentos / cotações","Contratos com prestadores","Apólice de seguro","AVCB (Bombeiros)","Laudos técnicos (SPDA, elevador, estrutura)","Certidões","Comunicados / circulares","Plantas do prédio","Relatórios de manutenção"]},
-  {id:"docs_onde",label:"Onde esses documentos estão hoje?",type:"checks",opts:["Pasta física / papel","Computador da síndica","Google Drive / OneDrive","Com a administradora","E-mail","WhatsApp"]},
-  {id:"quem_envia",label:"Quem vai colocar documentos no app?",type:"radio",opts:["Só a síndica","Síndica e conselho","Administradora","Síndica e um morador ajudante"]},
-  {id:"quem_ve",label:"Quem pode ver os documentos?",type:"radio",opts:["Todos os moradores","Só proprietários","Proprietários e inquilinos","Depende do documento"]},
-  {id:"restritos",label:"Algum documento não deve ficar visível para todos?",type:"textarea"},
+ {id:"docs",title:"Documentos",intro:"O app terá um arquivo digital do condomínio, organizado por tipo e data.",fields:[
+  {id:"docs_existentes",label:"Quais documentos existem e podem ir para o app?",type:"checks",opts:["Convenção","Regimento interno","Atas de assembleia","Balancetes / prestações mensais","Notas fiscais e recibos","Orçamentos","Contratos com prestadores","Apólice de seguro","AVCB (Bombeiros)","Laudos técnicos","Comunicados","Plantas do prédio"]},
+  {id:"docs_onde",label:"Onde esses documentos estão hoje?",type:"checks",opts:["Pasta física / papel","Computador ou celular da síndica","Google Drive / OneDrive","E-mail","WhatsApp"]},
+  {id:"quem_ve",label:"Quem pode ver os documentos?",type:"radio",opts:["Todos os moradores","Só proprietários","Depende do documento"]},
   {id:"comprovante",label:"Cada despesa deve ter o comprovante anexado?",type:"radio",opts:["Sim, todas","Só acima de um valor","Não é necessário"]},
-  {id:"comprovante_valor",label:"Se for acima de um valor, qual?",type:"text",ph:"Ex.: R$ 500,00"},
-  {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: último balancete, convenção, regimento. Servem de modelo para o app. PDF ou imagem.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt"}
+  {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: a última prestação de contas enviada no WhatsApp, a convenção. PDF, imagem ou planilha.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt,.xlsx,.xls"}
  ]},
- {id:"moradores",title:"Moradores e comunicação",intro:"Quem acessa o app e o que mais ele pode oferecer.",fields:[
-  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Os nomes servem só para cadastrar o acesso ao app. Uma linha por pessoa responsável.",type:"table",addLabel:"Adicionar morador",
+ {id:"moradores",title:"Moradores",intro:"Cada apartamento vai receber um código de acesso. Os nomes servem só para esse cadastro.",fields:[
+  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Uma linha por pessoa responsável.",type:"table",addLabel:"Adicionar morador",
    cols:[{id:"bloco",label:"Bloco",type:"text"},{id:"apto",label:"Apto",type:"text"},{id:"nome",label:"Nome completo",type:"text"},{id:"vinculo",label:"Vínculo",type:"select",opts:["","Proprietário(a)","Inquilino(a)","Familiar / outro morador"]}],
    seed:[{},{},{}]},
-  {id:"mor_colar",label:"Ou cole a lista de moradores aqui",hint:"Se tiver a lista em planilha ou no WhatsApp, cole como está: apartamento e nome.",type:"textarea"},
-  {id:"acesso",label:"Como os moradores devem entrar no app?",type:"radio",opts:["Cadastro com e-mail, aprovado pela síndica","Convite enviado pela síndica","Código por apartamento"]},
-  {id:"inquilinos",label:"Inquilinos têm acesso?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]},
-  {id:"funcoes",label:"Além de contas e documentos, o que mais seria útil?",type:"checks",opts:["Mural de avisos","Registro de ocorrências e manutenção","Aviso de encomendas","Contatos úteis e emergência","Calendário (assembleias, manutenções)","Enquetes simples"]},
-  {id:"moradores_obs",label:"Algum problema de comunicação hoje que o app poderia resolver?",type:"textarea"}
- ]},
- {id:"visual",title:"Visual",intro:"Preferências de aparência do app.",fields:[
-  {id:"logo",label:"O condomínio tem logotipo?",type:"radio",opts:["Sim","Não"]},
-  {id:"cores",label:"Cores preferidas",hint:"Pode ser as cores da fachada.",type:"text"},
-  {id:"estilo",label:"Estilo do app",type:"radio",opts:["Sóbrio e institucional","Moderno e leve","Acolhedor, de vizinhança"]}
+  {id:"mor_colar",label:"Ou cole a lista de moradores aqui",hint:"Se tiver a lista em planilha ou no grupo de WhatsApp, cole como está: apartamento e nome.",type:"textarea"},
+  {id:"inquilinos",label:"Inquilinos têm acesso ao app?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]}
  ]},
  {id:"fim",title:"Finalizar",intro:"Confira as respostas e toque em Concluir e enviar.",fields:[
+  {id:"cores",label:"Cores preferidas para o app",hint:"Pode ser as cores da fachada.",type:"text"},
   {id:"obs",label:"Algo mais que devemos saber?",type:"textarea"},
   {row:[{id:"preenchido_por",label:"Preenchido por",type:"text"},{id:"data",label:"Data",type:"date"}]},
   {id:"lgpd",label:"Concordo que estas informações sejam usadas só para criar o app do condomínio.",type:"agree"}
  ]}
 ];
 
-const DOC_PATH="formulario/respostas";
-const LS_KEY="vf-sindica-rascunho";
+const DOC_PATH="formulario/sindica";
+const LS_KEY="vf-sindica-v2";
 const state={values:{},files:[],status:"rascunho",updatedAt:null};
 let db=null,assets=null,canWrite=false,saveTimer=null,saving=false,pending=false;
 const $=s=>document.querySelector(s);
@@ -241,6 +237,7 @@ function fieldHTML(f){
 }
 
 function render(){
+  $("#knownList").innerHTML=PRESET.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
   $("#rail").innerHTML=SECTIONS.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${esc(s.title)}<span class="n"></span></a>`).join("");
   $("#form").innerHTML=SECTIONS.map(s=>`<section class="sec" id="${s.id}" style="margin-bottom:44px">
     <div class="sec-head"><h2>${esc(s.title)}</h2><span class="count" data-count="${s.id}"></span></div>
@@ -327,7 +324,7 @@ async function onFiles(input){
 }
 
 function asText(){
-  const lines=["FORMULÁRIO DA SÍNDICA · RESIDENCIAL VILA FORMOSA",""];
+  const lines=["FORMULÁRIO DA SÍNDICA · RESIDENCIAL VILA FORMOSA","","== JÁ RESPONDIDO PELO MARCOS ==",...PRESET.map(([k,v])=>`${k}: ${v}`),""];
   SECTIONS.forEach(s=>{
     lines.push("== "+s.title.toUpperCase()+" ==");
     s.fields.flatMap(f=>f.row?f.row:[f]).forEach(f=>{
