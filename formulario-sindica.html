@@ -1,0 +1,340 @@
+<title>Formulário Vila Formosa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: coluna única de leitura com trilho de seções; cada seção é uma "pasta" do arquivo do condomínio */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --fg:#17211f; --muted:#5b6a66; --line:#d5dddb;
+  --accent:#1f6b5c; --accent-soft:#dcece7; --on-accent:#ffffff; --warn:#8a5a00; --warn-soft:#fbefd6; --ok:#1f6b3a;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111816; --surface:#18221f; --fg:#e4ece9; --muted:#9aaba6; --line:#2c3a36;
+  --accent:#6cc2ad; --accent-soft:#1d3530; --on-accent:#0d1714; --warn:#f0c46a; --warn-soft:#3a2f17; --ok:#7fd49a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --surface:#18221f; --fg:#e4ece9; --muted:#9aaba6; --line:#2c3a36;
+  --accent:#6cc2ad; --accent-soft:#1d3530; --on-accent:#0d1714; --warn:#f0c46a; --warn-soft:#3a2f17; --ok:#7fd49a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 96px;display:grid;gap:28px}
+header{display:grid;gap:10px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(28px,6vw,40px)/1.08 var(--display);margin:0;text-wrap:balance}
+h2{font:700 22px/1.2 var(--display);margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:0;max-width:62ch}
+.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px;color:var(--muted)}
+.pill{font:500 12px/1 var(--mono);padding:6px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.notice{background:var(--warn-soft);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:15px}
+.notice[hidden]{display:none!important}
+nav.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.rail a{flex:none;text-decoration:none;color:var(--muted);font-size:14px;padding:6px 10px;border-radius:8px;white-space:nowrap}
+nav.rail a:hover,nav.rail a:focus-visible{background:var(--accent-soft);color:var(--accent);outline:none}
+nav.rail a .n{font:500 11px var(--mono);margin-left:6px;color:var(--accent)}
+section.sec{display:grid;gap:18px;scroll-margin-top:64px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--fg);padding-bottom:8px}
+.sec-head .count{font:500 12px var(--mono);color:var(--muted)}
+.sec-intro{margin:0;color:var(--muted);font-size:15px}
+.field{display:grid;gap:6px;min-width:0}
+.field>label,.field>.lbl{font-weight:600}
+.hint{font-size:14px;color:var(--muted);margin:0}
+input[type=text],input[type=number],input[type=date],textarea,select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+textarea{min-height:88px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.opt span{display:block;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:15px}
+.opt input:checked+span{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.opt input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.agree{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.agree input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent)}
+.up{border:1px dashed var(--line);border-radius:10px;padding:14px;display:grid;gap:12px;background:var(--surface)}
+.up-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.thumb{display:grid;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:var(--accent-soft)}
+.thumb .doc{aspect-ratio:4/3;border-radius:6px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:500 13px var(--mono)}
+.thumb .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thumb button{justify-self:start}
+button{font:600 15px var(--body);border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+button.link{border:0;background:none;padding:0;color:var(--accent);font-size:13px;text-decoration:underline}
+button:disabled{opacity:.55;cursor:default}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar-in{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar-in .msg{flex:1 1 180px;font-size:14px;color:var(--muted)}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;flex:1 1 100%}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Residencial Vila Formosa · App do condomínio</div>
+    <h1>Formulário para a síndica</h1>
+    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas, guarda de documentos e fotos do prédio. Leva cerca de 15 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
+    <div class="status"><span class="pill" id="saveState">Carregando…</span><span id="progressTxt">0 de 0 perguntas respondidas</span></div>
+    <div class="notice" id="offlineNote" hidden>Neste acesso as respostas ficam salvas só neste aparelho. Ao terminar, toque em <b>Copiar respostas</b> e envie o texto para o Marcos pelo WhatsApp. Fotos e documentos podem ir junto pelo WhatsApp ou por um link do Google Drive.</div>
+  </header>
+  <nav class="rail" id="rail" aria-label="Seções do formulário"></nav>
+  <form id="form" novalidate></form>
+</div>
+
+<div class="bar"><div class="bar-in">
+  <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+  <span class="msg" id="barMsg">As respostas são salvas enquanto você digita.</span>
+  <button type="button" id="copyBtn">Copiar respostas</button>
+  <button type="button" class="primary" id="sendBtn">Concluir e enviar</button>
+</div></div>
+
+<script>
+const OPT_SN=["Sim","Não"];
+const SECTIONS=[
+ {id:"condominio",title:"O condomínio",intro:"Dados básicos que aparecem na tela inicial do app.",fields:[
+  {id:"nome_oficial",label:"Nome oficial (como está na convenção)",type:"text",ph:"Residencial Vila Formosa"},
+  {id:"cnpj",label:"CNPJ do condomínio",type:"text",ph:"00.000.000/0000-00"},
+  {id:"endereco",label:"Endereço completo",type:"text",ph:"Rua, número, bairro, cidade"},
+  {row:[{id:"blocos",label:"Nº de blocos",type:"number"},{id:"unidades",label:"Nº de apartamentos",type:"number"},{id:"andares",label:"Andares por bloco",type:"number"},{id:"ano",label:"Ano de entrega do prédio",type:"number"}]},
+  {id:"portaria",label:"Portaria",type:"radio",opts:["24 horas","Horário comercial","Remota / virtual","Não há portaria"]},
+  {id:"elevador",label:"Tem elevador?",type:"radio",opts:OPT_SN},
+  {id:"espacos",label:"Espaços e equipamentos do condomínio",hint:"Ajuda a organizar as fotos e os registros de manutenção.",type:"checks",opts:["Hall de entrada","Garagem","Jardim / áreas verdes","Playground","Salão","Churrasqueira","Elevador","Caixa d'água / bombas","Lixeira","Portão eletrônico","Câmeras (CFTV)","Interfone"]}
+ ]},
+ {id:"gestao",title:"Gestão",intro:"Quem administra e como os moradores falam com a gestão.",fields:[
+  {row:[{id:"sindica_nome",label:"Nome da síndica",type:"text"},{id:"mandato_fim",label:"Fim do mandato atual",type:"date"}]},
+  {id:"subsindico",label:"Subsíndico(a), se houver",type:"text"},
+  {id:"conselho",label:"Conselho fiscal / consultivo",hint:"Nomes e apartamentos.",type:"textarea"},
+  {id:"administradora",label:"O condomínio tem administradora?",type:"radio",opts:OPT_SN},
+  {id:"administradora_nome",label:"Nome da administradora",type:"text",ph:"Se houver"},
+  {id:"contabilidade",label:"Quem faz a contabilidade?",type:"radio",opts:["Administradora","Contador(a) contratado","A própria síndica","Ninguém formalmente"]},
+  {id:"canais",label:"Como os moradores falam com a síndica hoje?",type:"checks",opts:["WhatsApp individual","Grupo de WhatsApp","E-mail","Livro de ocorrências","Pessoalmente","Bilhete na portaria"]},
+  {id:"contato_publico",label:"Contato da gestão que pode aparecer no app",hint:"Telefone ou e-mail. Deixe em branco se preferir não mostrar.",type:"text"}
+ ]},
+ {id:"contas",title:"Prestação de contas",intro:"A parte principal do app. Queremos mostrar para onde vai o dinheiro de forma clara.",fields:[
+  {id:"periodicidade",label:"Com que frequência as contas são prestadas?",type:"radio",opts:["Mensal","Bimestral","Trimestral","Semestral","Anual"]},
+  {id:"elaborada_por",label:"Quem elabora a prestação de contas?",type:"radio",opts:["Síndica","Administradora","Contador(a)","Conselho fiscal"]},
+  {id:"formato_atual",label:"Como é divulgada hoje?",type:"checks",opts:["Balancete em PDF","Planilha (Excel)","Papel no mural","Enviada no WhatsApp","Só na assembleia","Não há divulgação regular"]},
+  {id:"aprovacao",label:"Quem aprova as contas?",type:"radio",opts:["Conselho fiscal","Assembleia","Conselho e assembleia","Não há aprovação formal"]},
+  {row:[{id:"taxa_valor",label:"Taxa condominial (R$/mês)",type:"text",ph:"Ex.: 350,00"},{id:"fundo_reserva",label:"Fundo de reserva",type:"text",ph:"Ex.: 10% da taxa"}]},
+  {id:"taxa_obs",label:"A taxa varia por apartamento?",hint:"Ex.: cobertura paga mais, rateio por fração ideal, taxa extra em andamento.",type:"textarea"},
+  {id:"receitas",label:"Outras receitas além da taxa",type:"checks",opts:["Multas e juros","Taxa extra / rateio","Rendimento de aplicação","Aluguel de espaço ou antena","Venda de recicláveis","Nenhuma"]},
+  {id:"despesas",label:"Principais despesas",type:"checks",opts:["Água e esgoto (Copasa)","Energia (Cemig)","Limpeza","Portaria / vigilância","Funcionários e encargos","Manutenção de elevador","Bombas e caixa d'água","Jardinagem","Dedetização","Seguro do prédio","Administradora","Contador(a)","Obras e reformas","Material de limpeza","Tarifas bancárias"]},
+  {id:"despesas_outras",label:"Outras despesas fixas",type:"text"},
+  {id:"mostrar_saldo",label:"Mostrar o saldo em caixa no app?",type:"radio",opts:["Sim, para todos","Só para o conselho","Não"]},
+  {id:"inadimplencia",label:"Como tratar a inadimplência no app?",hint:"Pela LGPD, o app não deve expor quais apartamentos estão devendo.",type:"radio",opts:["Mostrar só o percentual geral","Não mostrar"]},
+  {id:"historico_desde",label:"Desde quando há prestação de contas para colocar no app?",type:"text",ph:"Ex.: janeiro de 2024"},
+  {id:"visualizacoes",label:"O que seria mais útil para os moradores verem?",type:"checks",opts:["Receitas x despesas por mês","Gastos por categoria","Evolução do fundo de reserva","Comparação com o ano anterior","Lista de lançamentos com comprovante","Previsão de gastos (orçamento anual)"]},
+  {id:"contas_obs",label:"Observações sobre as contas",type:"textarea"}
+ ]},
+ {id:"docs",title:"Documentos e registros",intro:"O app terá um arquivo digital do condomínio, organizado por tipo e data.",fields:[
+  {id:"docs_existentes",label:"Quais documentos existem e podem ir para o app?",type:"checks",opts:["Convenção","Regimento interno","Atas de assembleia","Editais de convocação","Balancetes mensais","Notas fiscais e recibos","Orçamentos / cotações","Contratos com prestadores","Apólice de seguro","AVCB (Bombeiros)","Laudos técnicos (SPDA, elevador, estrutura)","Certidões","Comunicados / circulares","Plantas do prédio","Relatórios de manutenção"]},
+  {id:"docs_onde",label:"Onde esses documentos estão hoje?",type:"checks",opts:["Pasta física / papel","Computador da síndica","Google Drive / OneDrive","Com a administradora","E-mail","WhatsApp"]},
+  {id:"quem_envia",label:"Quem vai colocar documentos no app?",type:"radio",opts:["Só a síndica","Síndica e conselho","Administradora","Síndica e um morador ajudante"]},
+  {id:"quem_ve",label:"Quem pode ver os documentos?",type:"radio",opts:["Todos os moradores","Só proprietários","Proprietários e inquilinos","Depende do documento"]},
+  {id:"restritos",label:"Algum documento não deve ficar visível para todos?",type:"textarea"},
+  {id:"comprovante",label:"Cada despesa deve ter o comprovante anexado?",type:"radio",opts:["Sim, todas","Só acima de um valor","Não é necessário"]},
+  {id:"comprovante_valor",label:"Se for acima de um valor, qual?",type:"text",ph:"Ex.: R$ 500,00"},
+  {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: último balancete, convenção, regimento. Servem de modelo para o app. PDF ou imagem.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt"}
+ ]},
+ {id:"moradores",title:"Moradores e comunicação",intro:"Quem acessa o app e o que mais ele pode oferecer.",fields:[
+  {id:"acesso",label:"Como os moradores devem entrar no app?",type:"radio",opts:["Cadastro com e-mail, aprovado pela síndica","Convite enviado pela síndica","Código por apartamento"]},
+  {id:"inquilinos",label:"Inquilinos têm acesso?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]},
+  {id:"funcoes",label:"Além de contas e documentos, o que mais seria útil?",type:"checks",opts:["Mural de avisos","Registro de ocorrências e manutenção","Aviso de encomendas","Contatos úteis e emergência","Calendário (assembleias, manutenções)","Enquetes simples"]},
+  {id:"moradores_obs",label:"Algum problema de comunicação hoje que o app poderia resolver?",type:"textarea"}
+ ]},
+ {id:"visual",title:"Visual e fotos",intro:"O app vai usar fotos do próprio prédio. Evite fotos com moradores reconhecíveis ou placas de carro.",fields:[
+  {id:"logo",label:"O condomínio tem logotipo?",type:"radio",opts:["Sim (enviar abaixo)","Não"]},
+  {id:"cores",label:"Cores preferidas",hint:"Pode ser as cores da fachada.",type:"text"},
+  {id:"estilo",label:"Estilo do app",type:"radio",opts:["Sóbrio e institucional","Moderno e leve","Acolhedor, de vizinhança"]},
+  {id:"upload_fotos",label:"Fotos do condomínio",hint:"Fachada, entrada, hall, garagem, jardim, logotipo. Fotos na horizontal ficam melhores.",type:"upload",kind:"foto",accept:"image/*"},
+  {id:"fotos_link",label:"Ou link de uma pasta com as fotos",hint:"Google Drive, Google Fotos, OneDrive.",type:"text",ph:"https://"},
+  {id:"autoriza_fotos",label:"Autorizo o uso destas fotos no app do condomínio.",type:"agree"}
+ ]},
+ {id:"fim",title:"Finalizar",intro:"Confira as respostas e toque em Concluir e enviar.",fields:[
+  {id:"obs",label:"Algo mais que devemos saber?",type:"textarea"},
+  {row:[{id:"preenchido_por",label:"Preenchido por",type:"text"},{id:"data",label:"Data",type:"date"}]},
+  {id:"lgpd",label:"Concordo que estas informações sejam usadas só para criar o app do condomínio.",type:"agree"}
+ ]}
+];
+
+const DOC_PATH="formulario/respostas";
+const LS_KEY="vf-sindica-rascunho";
+const state={values:{},files:[],status:"rascunho",updatedAt:null};
+let db=null,assets=null,canWrite=false,saveTimer=null,saving=false,pending=false;
+const $=s=>document.querySelector(s);
+const flat=()=>SECTIONS.flatMap(s=>s.fields.flatMap(f=>f.row?f.row:[f]).map(f=>({...f,sec:s.id})));
+const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function fieldHTML(f){
+  const v=state.values[f.id];
+  const hint=f.hint?`<p class="hint" id="${f.id}-h">${esc(f.hint)}</p>`:"";
+  const desc=f.hint?` aria-describedby="${f.id}-h"`:"";
+  if(f.type==="text"||f.type==="number"||f.type==="date")
+    return `<div class="field"><label for="${f.id}">${esc(f.label)}</label>${hint}<input id="${f.id}" name="${f.id}" type="${f.type}"${f.type==="number"?' inputmode="numeric" min="0"':""} placeholder="${esc(f.ph||"")}" value="${esc(v||"")}"${desc}></div>`;
+  if(f.type==="textarea")
+    return `<div class="field"><label for="${f.id}">${esc(f.label)}</label>${hint}<textarea id="${f.id}" name="${f.id}"${desc}>${esc(v||"")}</textarea></div>`;
+  if(f.type==="radio"||f.type==="checks"){
+    const multi=f.type==="checks";
+    const sel=multi?(v||[]):[v];
+    const items=f.opts.map((o,i)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" id="${f.id}-${i}" name="${f.id}" value="${esc(o)}"${sel.includes(o)?" checked":""}><span>${esc(o)}</span></label>`).join("");
+    return `<div class="field" role="group" aria-labelledby="${f.id}-l"><div class="lbl" id="${f.id}-l">${esc(f.label)}${multi?' <span class="hint" style="display:inline">· marque todos que se aplicam</span>':""}</div>${hint}<div class="opts">${items}</div></div>`;
+  }
+  if(f.type==="agree")
+    return `<label class="agree"><input type="checkbox" id="${f.id}" name="${f.id}"${v?" checked":""}><span>${esc(f.label)}</span></label>`;
+  if(f.type==="upload")
+    return `<div class="field"><div class="lbl">${esc(f.label)}</div>${hint}<div class="up" data-kind="${f.kind}">
+      <div class="up-row"><input type="file" id="${f.id}" accept="${f.accept}" multiple aria-label="${esc(f.label)}"><span class="hint" id="${f.id}-st"></span></div>
+      <div class="thumbs" id="${f.id}-list"></div></div></div>`;
+  return "";
+}
+
+function render(){
+  $("#rail").innerHTML=SECTIONS.map(s=>`<a href="#${s.id}" data-sec="${s.id}">${esc(s.title)}<span class="n"></span></a>`).join("");
+  $("#form").innerHTML=SECTIONS.map(s=>`<section class="sec" id="${s.id}" style="margin-bottom:44px">
+    <div class="sec-head"><h2>${esc(s.title)}</h2><span class="count" data-count="${s.id}"></span></div>
+    <p class="sec-intro">${esc(s.intro)}</p>
+    ${s.fields.map(f=>f.row?`<div class="grid2">${f.row.map(fieldHTML).join("")}</div>`:fieldHTML(f)).join("")}
+  </section>`).join("");
+  renderFiles(); updateProgress();
+}
+
+function answered(f){
+  if(f.type==="upload") return state.files.some(x=>x.kind===f.kind);
+  const v=state.values[f.id];
+  return Array.isArray(v)?v.length>0:!!(v&&String(v).trim());
+}
+function updateProgress(){
+  const all=flat(); let done=0;
+  SECTIONS.forEach(s=>{
+    const fs=all.filter(f=>f.sec===s.id), d=fs.filter(answered).length; done+=d;
+    const txt=`${d}/${fs.length}`;
+    document.querySelector(`[data-count="${s.id}"]`).textContent=txt+" respondidas";
+    document.querySelector(`[data-sec="${s.id}"] .n`).textContent=txt;
+  });
+  $("#progressTxt").textContent=`${done} de ${all.length} perguntas respondidas`;
+  $("#meter").style.width=Math.round(done/all.length*100)+"%";
+}
+
+function renderFiles(){
+  [["upload_docs","doc"],["upload_fotos","foto"]].forEach(([id,kind])=>{
+    const box=document.getElementById(id+"-list"); if(!box) return;
+    box.innerHTML=state.files.filter(f=>f.kind===kind).map(f=>`<div class="thumb">
+      ${f.contentType&&f.contentType.startsWith("image/")?`<img src="${esc(f.url)}" alt="${esc(f.name)}" loading="lazy">`:`<div class="doc">${esc((f.name.split(".").pop()||"doc").toUpperCase())}</div>`}
+      <span class="nm" title="${esc(f.name)}">${esc(f.name)}</span>
+      ${assets?`<button type="button" class="link" data-del="${esc(f.id)}">Remover</button>`:""}</div>`).join("");
+  });
+}
+
+function readForm(e){
+  const t=e.target; if(!t.name) return;
+  const f=flat().find(x=>x.id===t.name); if(!f||f.type==="upload") return;
+  if(f.type==="checks") state.values[f.id]=[...document.querySelectorAll(`input[name="${f.id}"]:checked`)].map(i=>i.value);
+  else if(f.type==="agree") state.values[f.id]=t.checked;
+  else state.values[f.id]=t.value;
+  changed();
+}
+function changed(){
+  state.updatedAt=new Date().toISOString();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(_){}
+  updateProgress();
+  if(canWrite){setSave("Salvando…");clearTimeout(saveTimer);saveTimer=setTimeout(saveRemote,1800)}
+  else setSave("Salvo neste aparelho",true);
+}
+function setSave(t,warn){const p=$("#saveState");p.textContent=t;p.classList.toggle("warn",!!warn)}
+
+async function saveRemote(){
+  if(!canWrite) return;
+  if(saving){pending=true;return}
+  saving=true;
+  try{await db.doc(DOC_PATH).set(JSON.parse(JSON.stringify(state)));setSave("Salvo online")}
+  catch(err){canWrite=false;setSave("Salvo neste aparelho",true);$("#offlineNote").hidden=false}
+  finally{saving=false;if(pending){pending=false;saveRemote()}}
+}
+
+async function onFiles(input){
+  const kind=input.closest(".up").dataset.kind, st=document.getElementById(input.id+"-st");
+  const list=[...input.files]; if(!list.length) return;
+  let ok=0;
+  for(const file of list){
+    st.textContent=`Enviando ${ok+1} de ${list.length}…`;
+    try{const r=await assets.upload(file);state.files.push({id:r.id,url:r.url,name:file.name,contentType:r.contentType||file.type,kind});ok++}
+    catch(err){st.textContent=`"${file.name}" não foi enviado: ${err&&err.message?err.message:"arquivo grande demais ou formato não aceito"}.`}
+  }
+  if(ok) st.textContent=`${ok} arquivo(s) enviado(s).`;
+  input.value=""; renderFiles(); changed();
+}
+
+function asText(){
+  const lines=["FORMULÁRIO DA SÍNDICA · RESIDENCIAL VILA FORMOSA",""];
+  SECTIONS.forEach(s=>{
+    lines.push("== "+s.title.toUpperCase()+" ==");
+    s.fields.flatMap(f=>f.row?f.row:[f]).forEach(f=>{
+      if(f.type==="upload"){const n=state.files.filter(x=>x.kind===f.kind);lines.push(`${f.label}: ${n.length?n.map(x=>x.name).join(", "):"(enviar pelo WhatsApp ou link)"}`);return}
+      let v=state.values[f.id];
+      if(f.type==="agree") v=v?"Sim":"Não";
+      else if(Array.isArray(v)) v=v.join("; ");
+      lines.push(`${f.label}: ${v&&String(v).trim()?v:"—"}`);
+    });
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+async function copyAnswers(){
+  const txt=asText();
+  try{await navigator.clipboard.writeText(txt);$("#barMsg").textContent="Respostas copiadas. Cole no WhatsApp para o Marcos."}
+  catch(_){
+    let ta=document.getElementById("copyArea");
+    if(!ta){ta=document.createElement("textarea");ta.id="copyArea";ta.style.minHeight="240px";ta.setAttribute("aria-label","Respostas em texto");document.querySelector(".wrap").appendChild(ta)}
+    ta.value=txt;ta.focus();ta.select();ta.scrollIntoView({block:"center"});
+    $("#barMsg").textContent="Texto selecionado abaixo. Copie e envie pelo WhatsApp.";
+  }
+}
+async function finish(){
+  const missing=["lgpd"].filter(id=>!state.values[id]);
+  if(missing.length){$("#barMsg").textContent="Marque a concordância no fim do formulário para concluir.";document.getElementById("lgpd").scrollIntoView({block:"center"});return}
+  state.status="concluido";changed();
+  if(canWrite){clearTimeout(saveTimer);await saveRemote();$("#barMsg").textContent=canWrite?"Pronto! Respostas enviadas. Você ainda pode corrigir algo e elas serão atualizadas.":"Não foi possível salvar online. Use Copiar respostas."}
+  else copyAnswers();
+}
+
+$("#form").addEventListener("input",readForm);
+$("#form").addEventListener("change",e=>{if(e.target.type==="file")onFiles(e.target);else readForm(e)});
+$("#form").addEventListener("click",e=>{const id=e.target.dataset&&e.target.dataset.del;if(!id)return;state.files=state.files.filter(f=>f.id!==id);renderFiles();changed()});
+$("#form").addEventListener("submit",e=>e.preventDefault());
+$("#copyBtn").addEventListener("click",copyAnswers);
+$("#sendBtn").addEventListener("click",finish);
+
+// início: rascunho local, depois dados online quando disponíveis
+try{const d=JSON.parse(localStorage.getItem(LS_KEY)||"null");if(d&&d.values)Object.assign(state,d)}catch(_){}
+render();
+setSave("Salvo neste aparelho",true);
+
+(async()=>{
+  const c=window.claude;
+  if(!c||!c.use){$("#offlineNote").hidden=false;hideUploads();return}
+  const timer=setTimeout(()=>{if(!db){$("#offlineNote").hidden=false;hideUploads()}},10000);
+  const [dbNs,assetsNs,userNs]=await Promise.all([c.use("db"),c.use("assets"),c.use("user")]);
+  clearTimeout(timer);
+  db=dbNs;assets=assetsNs;
+  if(!assets) hideUploads();
+  if(!db){$("#offlineNote").hidden=false;return}
+  const w=userNs?await userNs.can("data.write"):null;
+  canWrite=w!==false;
+  if(!canWrite){$("#offlineNote").hidden=false}
+  try{
+    const snap=await db.doc(DOC_PATH).get();
+    const raw=snap&&snap.exists?snap.data():null;
+    const remote=raw?JSON.parse(JSON.stringify(raw)):null;
+    if(remote&&remote.values&&(!state.updatedAt||(remote.updatedAt&&remote.updatedAt>state.updatedAt))){Object.assign(state,remote);render()}
+    setSave(canWrite?"Salvo online":"Salvo neste aparelho",!canWrite);
+    if(canWrite&&state.updatedAt&&(!remote||!remote.updatedAt||state.updatedAt>remote.updatedAt)) saveRemote();
+  }catch(_){setSave(canWrite?"Pronto para salvar":"Salvo neste aparelho",!canWrite)}
+})();
+function hideUploads(){document.querySelectorAll(".up input[type=file]").forEach(i=>{i.disabled=true;const st=document.getElementById(i.id+"-st");if(st)st.textContent="Envio de arquivos indisponível neste acesso. Mande pelo WhatsApp ou cole um link do Drive."})}
+</script>
