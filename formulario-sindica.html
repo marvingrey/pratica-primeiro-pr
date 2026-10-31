@@ -63,6 +63,14 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,select:focus-vis
 .thumb .doc{aspect-ratio:4/3;border-radius:6px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:500 13px var(--mono)}
 .thumb .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .thumb button{justify-self:start}
+.tbl{display:grid;gap:10px}
+.trow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.trow .field{gap:4px}
+.trow label{font-size:13px;font-weight:600;color:var(--muted)}
+.trow input,.trow select{padding:8px 10px}
+.trow .rm{justify-self:start;align-self:center}
+.rownum{grid-column:1/-1;font:500 11px var(--mono);color:var(--accent);letter-spacing:.06em}
+select{appearance:auto}
 button{font:600 15px var(--body);border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
 button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 button.link{border:0;background:none;padding:0;color:var(--accent);font-size:13px;text-decoration:underline}
@@ -79,9 +87,9 @@ button:disabled{opacity:.55;cursor:default}
   <header>
     <div class="eyebrow">Residencial Vila Formosa · App do condomínio</div>
     <h1>Formulário para a síndica</h1>
-    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas, guarda de documentos e fotos do prédio. Leva cerca de 15 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
+    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas e guarda de documentos. Inclui controle do caixa, manutenções programadas, projetos futuros e a lista de moradores. Leva cerca de 25 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
     <div class="status"><span class="pill" id="saveState">Carregando…</span><span id="progressTxt">0 de 0 perguntas respondidas</span></div>
-    <div class="notice" id="offlineNote" hidden>Neste acesso as respostas ficam salvas só neste aparelho. Ao terminar, toque em <b>Copiar respostas</b> e envie o texto para o Marcos pelo WhatsApp. Fotos e documentos podem ir junto pelo WhatsApp ou por um link do Google Drive.</div>
+    <div class="notice" id="offlineNote" hidden>Neste acesso as respostas ficam salvas só neste aparelho. Ao terminar, toque em <b>Copiar respostas</b> e envie o texto para o Marcos pelo WhatsApp. Documentos podem ir junto pelo WhatsApp ou por um link do Google Drive.</div>
   </header>
   <nav class="rail" id="rail" aria-label="Seções do formulário"></nav>
   <form id="form" novalidate></form>
@@ -132,6 +140,31 @@ const SECTIONS=[
   {id:"visualizacoes",label:"O que seria mais útil para os moradores verem?",type:"checks",opts:["Receitas x despesas por mês","Gastos por categoria","Evolução do fundo de reserva","Comparação com o ano anterior","Lista de lançamentos com comprovante","Previsão de gastos (orçamento anual)"]},
   {id:"contas_obs",label:"Observações sobre as contas",type:"textarea"}
  ]},
+ {id:"caixa",title:"Controle do caixa",intro:"Como o dinheiro do condomínio é guardado e movimentado no dia a dia.",fields:[
+  {id:"banco",label:"Banco da conta do condomínio",hint:"Só o nome do banco. Não informe agência, conta ou senha.",type:"text",ph:"Ex.: Caixa, Banco do Brasil, Inter"},
+  {id:"contas_separadas",label:"Quais contas ou fundos existem?",type:"checks",opts:["Conta corrente principal","Fundo de reserva em conta separada","Aplicação / poupança","Fundo de obras","Caixinha em dinheiro (fundo fixo)"]},
+  {id:"quem_movimenta",label:"Quem movimenta a conta?",type:"radio",opts:["Só a síndica","Síndica e subsíndico(a)","Administradora","Exige duas assinaturas"]},
+  {id:"registro_mov",label:"Como entradas e saídas são registradas hoje?",type:"radio",opts:["Planilha","Sistema da administradora","Caderno / livro caixa","Só pelo extrato do banco","Não há registro"]},
+  {id:"conciliacao",label:"Com que frequência o extrato é conferido com os lançamentos?",type:"radio",opts:["Semanal","Mensal","Só na prestação de contas","Não é feito"]},
+  {id:"forma_pagto",label:"Como os moradores pagam a taxa?",type:"checks",opts:["Boleto","Pix","Depósito / transferência","Débito automático","Dinheiro"]},
+  {id:"vencimento",label:"Dia de vencimento da taxa",type:"number"},
+  {id:"multa_juros",label:"Multa e juros por atraso",type:"text",ph:"Ex.: 2% de multa + 1% ao mês"},
+  {id:"aprovacao_gasto",label:"Gastos acima de qual valor precisam de aprovação do conselho ou assembleia?",type:"text",ph:"Ex.: R$ 2.000,00"},
+  {id:"caixa_obs",label:"Observações sobre o caixa",type:"textarea"}
+ ]},
+ {id:"manutencao",title:"Manutenções programadas",intro:"Serviços que se repetem. O app vai lembrar as datas e guardar o registro de cada execução.",fields:[
+  {id:"manut_lista",label:"Manutenções do condomínio",hint:"Já deixamos as mais comuns. Apague as que não se aplicam e acrescente outras.",type:"table",addLabel:"Adicionar manutenção",
+   cols:[{id:"item",label:"Serviço",type:"text"},{id:"freq",label:"Frequência",type:"select",opts:["","Mensal","Trimestral","Semestral","Anual","A cada 5 anos","Quando necessário"]},{id:"prestador",label:"Empresa / prestador",type:"text"},{id:"ultima",label:"Última vez feita",type:"text",ph:"mês/ano"}],
+   seed:["Limpeza da caixa d'água","Dedetização / desratização","Manutenção do elevador","Recarga dos extintores","Manutenção das bombas","Manutenção do portão eletrônico","Inspeção do para-raios (SPDA)","Renovação do AVCB","Limpeza de calhas e telhado","Jardinagem"].map(item=>({item}))},
+  {id:"manut_obs",label:"Algum serviço atrasado ou com problema hoje?",type:"textarea"}
+ ]},
+ {id:"projetos",title:"Projetos futuros",intro:"Obras e melhorias planejadas. O app vai mostrar o andamento e quanto já foi arrecadado.",fields:[
+  {id:"proj_lista",label:"Projetos planejados ou em discussão",type:"table",addLabel:"Adicionar projeto",
+   cols:[{id:"nome",label:"Projeto",type:"text",ph:"Ex.: Pintura da fachada"},{id:"prioridade",label:"Prioridade",type:"select",opts:["","Alta","Média","Baixa"]},{id:"custo",label:"Custo estimado (R$)",type:"text"},{id:"prazo",label:"Previsão",type:"text",ph:"mês/ano"},{id:"situacao",label:"Situação",type:"select",opts:["","Ideia","Orçando","Aprovado em assembleia","Arrecadando","Em execução"]}],
+   seed:[{}]},
+  {id:"proj_recursos",label:"Como os projetos são pagos?",type:"checks",opts:["Fundo de reserva","Fundo de obras","Taxa extra / rateio","Ainda não definido"]},
+  {id:"proj_obs",label:"Observações sobre os projetos",type:"textarea"}
+ ]},
  {id:"docs",title:"Documentos e registros",intro:"O app terá um arquivo digital do condomínio, organizado por tipo e data.",fields:[
   {id:"docs_existentes",label:"Quais documentos existem e podem ir para o app?",type:"checks",opts:["Convenção","Regimento interno","Atas de assembleia","Editais de convocação","Balancetes mensais","Notas fiscais e recibos","Orçamentos / cotações","Contratos com prestadores","Apólice de seguro","AVCB (Bombeiros)","Laudos técnicos (SPDA, elevador, estrutura)","Certidões","Comunicados / circulares","Plantas do prédio","Relatórios de manutenção"]},
   {id:"docs_onde",label:"Onde esses documentos estão hoje?",type:"checks",opts:["Pasta física / papel","Computador da síndica","Google Drive / OneDrive","Com a administradora","E-mail","WhatsApp"]},
@@ -143,18 +176,19 @@ const SECTIONS=[
   {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: último balancete, convenção, regimento. Servem de modelo para o app. PDF ou imagem.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt"}
  ]},
  {id:"moradores",title:"Moradores e comunicação",intro:"Quem acessa o app e o que mais ele pode oferecer.",fields:[
+  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Os nomes servem só para cadastrar o acesso ao app. Uma linha por pessoa responsável.",type:"table",addLabel:"Adicionar morador",
+   cols:[{id:"bloco",label:"Bloco",type:"text"},{id:"apto",label:"Apto",type:"text"},{id:"nome",label:"Nome completo",type:"text"},{id:"vinculo",label:"Vínculo",type:"select",opts:["","Proprietário(a)","Inquilino(a)","Familiar / outro morador"]}],
+   seed:[{},{},{}]},
+  {id:"mor_colar",label:"Ou cole a lista de moradores aqui",hint:"Se tiver a lista em planilha ou no WhatsApp, cole como está: apartamento e nome.",type:"textarea"},
   {id:"acesso",label:"Como os moradores devem entrar no app?",type:"radio",opts:["Cadastro com e-mail, aprovado pela síndica","Convite enviado pela síndica","Código por apartamento"]},
   {id:"inquilinos",label:"Inquilinos têm acesso?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]},
   {id:"funcoes",label:"Além de contas e documentos, o que mais seria útil?",type:"checks",opts:["Mural de avisos","Registro de ocorrências e manutenção","Aviso de encomendas","Contatos úteis e emergência","Calendário (assembleias, manutenções)","Enquetes simples"]},
   {id:"moradores_obs",label:"Algum problema de comunicação hoje que o app poderia resolver?",type:"textarea"}
  ]},
- {id:"visual",title:"Visual e fotos",intro:"O app vai usar fotos do próprio prédio. Evite fotos com moradores reconhecíveis ou placas de carro.",fields:[
-  {id:"logo",label:"O condomínio tem logotipo?",type:"radio",opts:["Sim (enviar abaixo)","Não"]},
+ {id:"visual",title:"Visual",intro:"Preferências de aparência do app.",fields:[
+  {id:"logo",label:"O condomínio tem logotipo?",type:"radio",opts:["Sim","Não"]},
   {id:"cores",label:"Cores preferidas",hint:"Pode ser as cores da fachada.",type:"text"},
-  {id:"estilo",label:"Estilo do app",type:"radio",opts:["Sóbrio e institucional","Moderno e leve","Acolhedor, de vizinhança"]},
-  {id:"upload_fotos",label:"Fotos do condomínio",hint:"Fachada, entrada, hall, garagem, jardim, logotipo. Fotos na horizontal ficam melhores.",type:"upload",kind:"foto",accept:"image/*"},
-  {id:"fotos_link",label:"Ou link de uma pasta com as fotos",hint:"Google Drive, Google Fotos, OneDrive.",type:"text",ph:"https://"},
-  {id:"autoriza_fotos",label:"Autorizo o uso destas fotos no app do condomínio.",type:"agree"}
+  {id:"estilo",label:"Estilo do app",type:"radio",opts:["Sóbrio e institucional","Moderno e leve","Acolhedor, de vizinhança"]}
  ]},
  {id:"fim",title:"Finalizar",intro:"Confira as respostas e toque em Concluir e enviar.",fields:[
   {id:"obs",label:"Algo mais que devemos saber?",type:"textarea"},
@@ -187,6 +221,18 @@ function fieldHTML(f){
   }
   if(f.type==="agree")
     return `<label class="agree"><input type="checkbox" id="${f.id}" name="${f.id}"${v?" checked":""}><span>${esc(f.label)}</span></label>`;
+  if(f.type==="table"){
+    const rows=tableRows(f);
+    const rowsHTML=rows.map((r,ri)=>`<div class="trow"><span class="rownum">${ri+1}</span>${f.cols.map(c=>{
+      const nid=`${f.id}--${ri}--${c.id}`, val=r[c.id]||"";
+      const ctrl=c.type==="select"
+        ?`<select id="${nid}" name="${nid}">${c.opts.map(o=>`<option value="${esc(o)}"${o===val?" selected":""}>${o?esc(o):"Escolha"}</option>`).join("")}</select>`
+        :`<input type="text" id="${nid}" name="${nid}" value="${esc(val)}" placeholder="${esc(c.ph||"")}">`;
+      return `<div class="field"><label for="${nid}">${esc(c.label)}</label>${ctrl}</div>`;}).join("")}
+      <button type="button" class="link rm" data-rmrow="${f.id}" data-ri="${ri}">Remover linha</button></div>`).join("");
+    return `<div class="field"><div class="lbl">${esc(f.label)}</div>${hint}<div class="tbl" id="${f.id}">${rowsHTML}</div>
+      <div><button type="button" data-addrow="${f.id}">+ ${esc(f.addLabel||"Adicionar linha")}</button></div></div>`;
+  }
   if(f.type==="upload")
     return `<div class="field"><div class="lbl">${esc(f.label)}</div>${hint}<div class="up" data-kind="${f.kind}">
       <div class="up-row"><input type="file" id="${f.id}" accept="${f.accept}" multiple aria-label="${esc(f.label)}"><span class="hint" id="${f.id}-st"></span></div>
@@ -204,8 +250,14 @@ function render(){
   renderFiles(); updateProgress();
 }
 
+function tableRows(f){
+  if(!Array.isArray(state.values[f.id])) state.values[f.id]=(f.seed||[{}]).map(r=>({...r}));
+  return state.values[f.id];
+}
+const rowFilled=r=>Object.values(r||{}).some(v=>v&&String(v).trim());
 function answered(f){
   if(f.type==="upload") return state.files.some(x=>x.kind===f.kind);
+  if(f.type==="table") return (state.values[f.id]||[]).some(r=>rowFilled(r)&&!(f.seed||[]).some(s=>JSON.stringify(s)===JSON.stringify(r)));
   const v=state.values[f.id];
   return Array.isArray(v)?v.length>0:!!(v&&String(v).trim());
 }
@@ -222,7 +274,7 @@ function updateProgress(){
 }
 
 function renderFiles(){
-  [["upload_docs","doc"],["upload_fotos","foto"]].forEach(([id,kind])=>{
+  [["upload_docs","doc"]].forEach(([id,kind])=>{
     const box=document.getElementById(id+"-list"); if(!box) return;
     box.innerHTML=state.files.filter(f=>f.kind===kind).map(f=>`<div class="thumb">
       ${f.contentType&&f.contentType.startsWith("image/")?`<img src="${esc(f.url)}" alt="${esc(f.name)}" loading="lazy">`:`<div class="doc">${esc((f.name.split(".").pop()||"doc").toUpperCase())}</div>`}
@@ -233,6 +285,10 @@ function renderFiles(){
 
 function readForm(e){
   const t=e.target; if(!t.name) return;
+  if(t.name.includes("--")){
+    const [fid,ri,cid]=t.name.split("--"), tf=flat().find(x=>x.id===fid);
+    if(!tf) return; const rows=tableRows(tf); rows[+ri]={...rows[+ri],[cid]:t.value}; changed(); return;
+  }
   const f=flat().find(x=>x.id===t.name); if(!f||f.type==="upload") return;
   if(f.type==="checks") state.values[f.id]=[...document.querySelectorAll(`input[name="${f.id}"]:checked`)].map(i=>i.value);
   else if(f.type==="agree") state.values[f.id]=t.checked;
@@ -276,6 +332,12 @@ function asText(){
     lines.push("== "+s.title.toUpperCase()+" ==");
     s.fields.flatMap(f=>f.row?f.row:[f]).forEach(f=>{
       if(f.type==="upload"){const n=state.files.filter(x=>x.kind===f.kind);lines.push(`${f.label}: ${n.length?n.map(x=>x.name).join(", "):"(enviar pelo WhatsApp ou link)"}`);return}
+      if(f.type==="table"){
+        const rows=(state.values[f.id]||[]).filter(rowFilled);
+        lines.push(`${f.label}:${rows.length?"":" —"}`);
+        rows.forEach((r,i)=>lines.push(`  ${i+1}. `+f.cols.map(c=>`${c.label}: ${r[c.id]||"—"}`).join(" | ")));
+        return;
+      }
       let v=state.values[f.id];
       if(f.type==="agree") v=v?"Sim":"Não";
       else if(Array.isArray(v)) v=v.join("; ");
@@ -305,7 +367,16 @@ async function finish(){
 
 $("#form").addEventListener("input",readForm);
 $("#form").addEventListener("change",e=>{if(e.target.type==="file")onFiles(e.target);else readForm(e)});
-$("#form").addEventListener("click",e=>{const id=e.target.dataset&&e.target.dataset.del;if(!id)return;state.files=state.files.filter(f=>f.id!==id);renderFiles();changed()});
+$("#form").addEventListener("click",e=>{
+  const d=e.target.dataset||{};
+  if(d.addrow||d.rmrow){
+    const f=flat().find(x=>x.id===(d.addrow||d.rmrow)), rows=tableRows(f);
+    if(d.addrow) rows.push({}); else rows.splice(+d.ri,1);
+    const y=window.scrollY; render(); window.scrollTo(0,y); changed();
+    if(d.addrow){const last=document.querySelectorAll(`#${f.id} .trow`);const inp=last[last.length-1]&&last[last.length-1].querySelector("input,select");if(inp)inp.focus({preventScroll:true})}
+    return;
+  }
+  const id=d.del;if(!id)return;state.files=state.files.filter(f=>f.id!==id);renderFiles();changed()});
 $("#form").addEventListener("submit",e=>e.preventDefault());
 $("#copyBtn").addEventListener("click",copyAnswers);
 $("#sendBtn").addEventListener("click",finish);
