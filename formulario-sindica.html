@@ -92,13 +92,13 @@ button:disabled{opacity:.55;cursor:default}
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Residencial Vila Formosa · App do condomínio</div>
+    <div class="eyebrow">Residencial Villa Formosa · App do condomínio</div>
     <h1>Formulário para a síndica</h1>
-    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas e guarda de documentos. Parte das perguntas já foi respondida pelo Marcos e aparece logo abaixo. Faltam dados que só a síndica tem, como valores, caixa, manutenções e a lista de moradores. Leva cerca de 15 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
+    <p class="lead">Estas respostas vão orientar a criação do app do condomínio, com foco em prestação de contas e guarda de documentos. Parte das informações já foi preenchida pelo Marcos e com base em documentos do condomínio (atas e boleto). Elas aparecem logo abaixo. Faltam dados que só a síndica tem, como caixa, despesas, manutenções e os nomes dos moradores. Leva cerca de 10 minutos. Pode parar e continuar depois: as respostas ficam salvas.</p>
     <div class="status"><span class="pill" id="saveState">Carregando…</span><span id="progressTxt">0 de 0 perguntas respondidas</span></div>
     <div class="notice" id="offlineNote" hidden>Neste acesso as respostas ficam salvas só neste aparelho. Ao terminar, toque em <b>Copiar respostas</b> e envie o texto para o Marcos pelo WhatsApp. Documentos podem ir junto pelo WhatsApp ou por um link do Google Drive.</div>
   </header>
-  <details class="known" id="known" open><summary>Já sabemos (respondido pelo Marcos)</summary><dl id="knownList"></dl><p class="hint">Se algo estiver errado, corrija no campo "Algo mais que devemos saber?" no final.</p></details>
+  <details class="known" id="known" open><summary>Já sabemos (respostas do Marcos e documentos do condomínio)</summary><dl id="knownList"></dl><p class="hint">Se algo estiver errado, corrija no campo "Algo mais que devemos saber?" no final.</p></details>
   <nav class="rail" id="rail" aria-label="Seções do formulário"></nav>
   <form id="form" novalidate></form>
 </div>
@@ -113,6 +113,13 @@ button:disabled{opacity:.55;cursor:default}
 <script>
 const OPT_SN=["Sim","Não"];
 const PRESET=[
+ ["Nome oficial","Residencial (Edifício) Villa Formosa"],
+ ["CNPJ","26.541.752/0001-53"],
+ ["Endereço","Rua Clementina de Jesus, 90 – Flávio Marques Lisboa (Bonsucesso, Barreiro), Belo Horizonte/MG, CEP 30622-460"],
+ ["Apartamentos","12 apartamentos em 2 andares: 101 a 106 e 201 a 206"],
+ ["Síndica","Ana Maria Peixoto da Silva. Eleita em 02/10/2023 e reeleita em 06/10/2025."],
+ ["Taxa condominial","R$ 214,93 (boleto do apto 203, vencimento 15/06/2026)"],
+ ["Boleto","Sicoob (cooperativa 4262), vencimento no dia 15, multa de 2% e juros de 0,01% ao dia após o vencimento"],
  ["Portaria","Não há portaria"],
  ["Elevador","Não tem"],
  ["Espaços e equipamentos","Garagem, jardim / áreas verdes, caixa d'água / bombas, portão eletrônico, interfone"],
@@ -129,21 +136,19 @@ const PRESET=[
 ];
 const SECTIONS=[
  {id:"condominio",title:"O condomínio",intro:"Dados básicos que aparecem na tela inicial do app.",fields:[
-  {id:"nome_oficial",label:"Nome oficial (como está na convenção)",type:"text",ph:"Residencial Vila Formosa"},
-  {id:"cnpj",label:"CNPJ do condomínio",type:"text",ph:"00.000.000/0000-00"},
-  {id:"endereco",label:"Endereço completo",type:"text",ph:"Rua, número, bairro, cidade"},
-  {row:[{id:"blocos",label:"Nº de blocos",type:"number"},{id:"unidades",label:"Nº de apartamentos",type:"number"},{id:"andares",label:"Andares por bloco",type:"number"},{id:"ano",label:"Ano de entrega do prédio",type:"number"}]}
+  {row:[{id:"ano",label:"Ano de entrega do prédio",type:"number"},{id:"vagas",label:"Vagas de garagem por apartamento",type:"text",ph:"Ex.: 2 para todos"}]}
  ]},
  {id:"gestao",title:"Gestão",intro:"Quem cuida do condomínio.",fields:[
-  {row:[{id:"sindica_nome",label:"Nome da síndica",type:"text"},{id:"mandato_fim",label:"Fim do mandato atual",type:"date"}]},
+  {id:"mandato_fim",label:"Até quando vai o mandato atual?",type:"date"},
   {id:"subsindico",label:"Subsíndico(a), se houver",type:"text"},
   {id:"conselho",label:"Conselho fiscal / consultivo, se houver",hint:"Nomes e apartamentos.",type:"textarea"},
   {id:"ajudante",label:"Morador que vai ajudar a colocar documentos no app",type:"text"},
   {id:"contato_publico",label:"Contato da síndica que pode aparecer no app",hint:"Telefone ou e-mail. Deixe em branco se preferir não mostrar.",type:"text"}
  ]},
  {id:"contas",title:"Prestação de contas",intro:"A parte principal do app: mostrar para onde vai o dinheiro de forma clara.",fields:[
-  {row:[{id:"taxa_valor",label:"Taxa condominial (R$/mês)",type:"text",ph:"Ex.: 350,00"},{id:"fundo_reserva",label:"Fundo de reserva",type:"text",ph:"Ex.: 10% da taxa"}]},
-  {id:"taxa_obs",label:"A taxa varia por apartamento?",hint:"Ex.: cobertura paga mais, rateio por fração ideal, taxa extra em andamento.",type:"textarea"},
+  {id:"taxa_igual",label:"A taxa é a mesma para todos os apartamentos?",type:"radio",opts:["Sim","Não, varia por apartamento"]},
+  {id:"taxa_obs",label:"Se varia, como é calculada?",hint:"Ex.: por fração ideal, por metragem, taxa extra em andamento.",type:"textarea"},
+  {id:"fundo_reserva",label:"Fundo de reserva",type:"text",ph:"Ex.: 10% da taxa"},
   {id:"receitas",label:"Outras receitas além da taxa",type:"checks",opts:["Multas e juros","Taxa extra / rateio","Rendimento de aplicação","Venda de recicláveis","Nenhuma"]},
   {id:"despesas",label:"Principais despesas",type:"checks",opts:["Água e esgoto (Copasa)","Energia (Cemig)","Limpeza","Funcionários e encargos","Bombas e caixa d'água","Portão eletrônico / interfone","Jardinagem","Dedetização","Seguro do prédio","Obras e reformas","Material de limpeza","Tarifas bancárias / boletos"]},
   {id:"despesas_outras",label:"Outras despesas fixas",type:"text"},
@@ -151,11 +156,9 @@ const SECTIONS=[
   {id:"contas_obs",label:"Observações sobre as contas",type:"textarea"}
  ]},
  {id:"caixa",title:"Controle do caixa",intro:"Como o dinheiro do condomínio é guardado e movimentado no dia a dia.",fields:[
-  {id:"banco",label:"Banco da conta e dos boletos",hint:"Só o nome do banco. Não informe agência, conta ou senha.",type:"text",ph:"Ex.: Caixa, Banco do Brasil, Inter"},
   {id:"contas_separadas",label:"Quais contas ou fundos existem?",type:"checks",opts:["Conta corrente principal","Fundo de reserva em conta separada","Aplicação / poupança","Fundo de obras","Caixinha em dinheiro"]},
   {id:"quem_movimenta",label:"Quem movimenta a conta?",type:"radio",opts:["Só a síndica","Síndica e subsíndico(a)","Exige duas assinaturas"]},
   {id:"registro_mov",label:"Como entradas e saídas são registradas hoje?",type:"radio",opts:["Planilha","Caderno / livro caixa","Aplicativo","Só pelo extrato do banco"]},
-  {row:[{id:"vencimento",label:"Dia de vencimento do boleto",type:"number"},{id:"multa_juros",label:"Multa e juros por atraso",type:"text",ph:"Ex.: 2% + 1% ao mês"}]},
   {id:"aprovacao_gasto",label:"Existe um valor a partir do qual o gasto precisa ser combinado com os moradores?",type:"text",ph:"Ex.: acima de R$ 2.000,00"},
   {id:"caixa_obs",label:"Observações sobre o caixa",type:"textarea"}
  ]},
@@ -179,9 +182,9 @@ const SECTIONS=[
   {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: a última prestação de contas enviada no WhatsApp, a convenção. PDF, imagem ou planilha.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt,.xlsx,.xls"}
  ]},
  {id:"moradores",title:"Moradores",intro:"Cada apartamento vai receber um código de acesso. Os nomes servem só para esse cadastro.",fields:[
-  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Uma linha por pessoa responsável.",type:"table",addLabel:"Adicionar morador",
-   cols:[{id:"bloco",label:"Bloco",type:"text"},{id:"apto",label:"Apto",type:"text"},{id:"nome",label:"Nome completo",type:"text"},{id:"vinculo",label:"Vínculo",type:"select",opts:["","Proprietário(a)","Inquilino(a)","Familiar / outro morador"]}],
-   seed:[{},{},{}]},
+  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Já listamos os 12 apartamentos. Se houver mais de um responsável, use Adicionar morador.",type:"table",addLabel:"Adicionar morador",
+   cols:[{id:"apto",label:"Apto",type:"text"},{id:"nome",label:"Nome completo",type:"text"},{id:"vinculo",label:"Vínculo",type:"select",opts:["","Proprietário(a)","Inquilino(a)","Familiar / outro morador"]}],
+   seed:["101","102","103","104","105","106","201","202","203","204","205","206"].map(apto=>({apto}))},
   {id:"mor_colar",label:"Ou cole a lista de moradores aqui",hint:"Se tiver a lista em planilha ou no grupo de WhatsApp, cole como está: apartamento e nome.",type:"textarea"},
   {id:"inquilinos",label:"Inquilinos têm acesso ao app?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]}
  ]},
@@ -194,7 +197,7 @@ const SECTIONS=[
 ];
 
 const DOC_PATH="formulario/sindica";
-const LS_KEY="vf-sindica-v2";
+const LS_KEY="vf-sindica-v3";
 const state={values:{},files:[],status:"rascunho",updatedAt:null};
 let db=null,assets=null,canWrite=false,saveTimer=null,saving=false,pending=false;
 const $=s=>document.querySelector(s);
@@ -324,7 +327,7 @@ async function onFiles(input){
 }
 
 function asText(){
-  const lines=["FORMULÁRIO DA SÍNDICA · RESIDENCIAL VILA FORMOSA","","== JÁ RESPONDIDO PELO MARCOS ==",...PRESET.map(([k,v])=>`${k}: ${v}`),""];
+  const lines=["FORMULÁRIO DA SÍNDICA · RESIDENCIAL VILLA FORMOSA","","== JÁ SABEMOS (MARCOS E DOCUMENTOS) ==",...PRESET.map(([k,v])=>`${k}: ${v}`),""];
   SECTIONS.forEach(s=>{
     lines.push("== "+s.title.toUpperCase()+" ==");
     s.fields.flatMap(f=>f.row?f.row:[f]).forEach(f=>{
