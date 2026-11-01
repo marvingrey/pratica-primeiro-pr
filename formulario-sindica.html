@@ -118,6 +118,7 @@ const PRESET=[
  ["Endereço","Rua Clementina de Jesus, 90 – Flávio Marques Lisboa (Bonsucesso, Barreiro), Belo Horizonte/MG, CEP 30622-460"],
  ["Apartamentos","12 apartamentos em 2 andares: 101 a 106 e 201 a 206"],
  ["Síndica","Ana Maria Peixoto da Silva. Eleita em 02/10/2023 e reeleita em 06/10/2025."],
+ ["Gestão","A síndica cuida do condomínio. Não há conselho fiscal ou consultivo."],
  ["Taxa condominial","R$ 214,93 (boleto do apto 203, vencimento 15/06/2026)"],
  ["Boleto","Sicoob (cooperativa 4262), vencimento no dia 15, multa de 2% e juros de 0,01% ao dia após o vencimento"],
  ["Portaria","Não há portaria"],
@@ -129,20 +130,19 @@ const PRESET=[
  ["No app","Saldo em caixa visível para todos; inadimplência só em percentual geral"],
  ["Gráficos e listas","Receitas x despesas por mês, gastos por categoria, fundo de reserva, lançamentos com comprovante, orçamento anual"],
  ["Pagamento da taxa","Boleto"],
- ["Documentos no app","Colocados pela síndica e um morador ajudante"],
+ ["Documentos no app","Colocados pela síndica e pelo Marcos (apto 203), morador ajudante"],
  ["Acesso ao app","Código por apartamento"],
  ["Outras funções","Calendário (assembleias, manutenções) e enquetes simples"],
  ["Visual","Sem logotipo; estilo acolhedor, de vizinhança"]
 ];
 const SECTIONS=[
- {id:"condominio",title:"O condomínio",intro:"Dados básicos que aparecem na tela inicial do app.",fields:[
-  {row:[{id:"ano",label:"Ano de entrega do prédio",type:"number"},{id:"vagas",label:"Vagas de garagem por apartamento",type:"text",ph:"Ex.: 2 para todos"}]}
+ {id:"condominio",title:"Vagas de garagem",intro:"Quantas vagas cada apartamento tem na garagem.",fields:[
+  {id:"vagas_lista",label:"Vagas por apartamento",hint:"Preencha a quantidade e, se houver, o número ou a posição das vagas.",type:"table",addLabel:"Adicionar linha",
+   cols:[{id:"apto",label:"Apto",type:"text"},{id:"qtd",label:"Nº de vagas",type:"text"},{id:"ident",label:"Número / posição das vagas",type:"text",ph:"Ex.: vagas 3 e 4"}],
+   seed:["101","102","103","104","105","106","201","202","203","204","205","206"].map(apto=>apto==="203"?{apto,qtd:"2"}:{apto})}
  ]},
- {id:"gestao",title:"Gestão",intro:"Quem cuida do condomínio.",fields:[
+ {id:"gestao",title:"Gestão",intro:"Mandato e contato da síndica.",fields:[
   {id:"mandato_fim",label:"Até quando vai o mandato atual?",type:"date"},
-  {id:"subsindico",label:"Subsíndico(a), se houver",type:"text"},
-  {id:"conselho",label:"Conselho fiscal / consultivo, se houver",hint:"Nomes e apartamentos.",type:"textarea"},
-  {id:"ajudante",label:"Morador que vai ajudar a colocar documentos no app",type:"text"},
   {id:"contato_publico",label:"Contato da síndica que pode aparecer no app",hint:"Telefone ou e-mail. Deixe em branco se preferir não mostrar.",type:"text"}
  ]},
  {id:"contas",title:"Prestação de contas",intro:"A parte principal do app: mostrar para onde vai o dinheiro de forma clara.",fields:[
@@ -182,9 +182,26 @@ const SECTIONS=[
   {id:"upload_docs",label:"Envie exemplos de documentos",hint:"Ex.: a última prestação de contas enviada no WhatsApp, a convenção. PDF, imagem ou planilha.",type:"upload",kind:"doc",accept:"application/pdf,image/*,.csv,.txt,.xlsx,.xls"}
  ]},
  {id:"moradores",title:"Moradores",intro:"Cada apartamento vai receber um código de acesso. Os nomes servem só para esse cadastro.",fields:[
-  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Já listamos os 12 apartamentos. Se houver mais de um responsável, use Adicionar morador.",type:"table",addLabel:"Adicionar morador",
+  {id:"mor_lista",label:"Moradores de cada apartamento",hint:"Os nomes vieram das atas de eleição de 2023 e 2025, lidas a partir de fotos. Confira a grafia, complete os apartamentos marcados com ? e o vínculo, e apague quem não mora mais no prédio.",type:"table",addLabel:"Adicionar morador",
    cols:[{id:"apto",label:"Apto",type:"text"},{id:"nome",label:"Nome completo",type:"text"},{id:"vinculo",label:"Vínculo",type:"select",opts:["","Proprietário(a)","Inquilino(a)","Familiar / outro morador"]}],
-   seed:["101","102","103","104","105","106","201","202","203","204","205","206"].map(apto=>({apto}))},
+   seed:[
+    {apto:"101",nome:"Thais Cristina Ferreira Monteiro"},
+    {apto:"102",nome:"Ellen Flávia Pereira"},
+    {apto:"102",nome:"Fabrina Suryan Pereira da Silva"},
+    {apto:"103"},{apto:"104"},
+    {apto:"105",nome:"Letícia Ribeiro de Almeida"},
+    {apto:"106",nome:"Vander Damaris"},
+    {apto:"201"},{apto:"202"},
+    {apto:"203",nome:"Marcos Vinicius de Souza Silva",vinculo:"Proprietário(a)"},
+    {apto:"204"},{apto:"205"},{apto:"206"},
+    {apto:"?",nome:"Ana Maria Peixoto da Silva"},
+    {apto:"?",nome:"Débora Ferreira Eler"},
+    {apto:"?",nome:"Daniela Maria Azevedo de Oliveira"},
+    {apto:"?",nome:"Alexandre Xavier Maciel"},
+    {apto:"?",nome:"Jollyona Xavier"},
+    {apto:"?",nome:"Robson André"},
+    {apto:"?",nome:"Tânia Clara Barbosa"}
+   ]},
   {id:"mor_colar",label:"Ou cole a lista de moradores aqui",hint:"Se tiver a lista em planilha ou no grupo de WhatsApp, cole como está: apartamento e nome.",type:"textarea"},
   {id:"inquilinos",label:"Inquilinos têm acesso ao app?",type:"radio",opts:["Sim, igual aos proprietários","Sim, mas sem prestação de contas","Não"]}
  ]},
@@ -197,7 +214,7 @@ const SECTIONS=[
 ];
 
 const DOC_PATH="formulario/sindica";
-const LS_KEY="vf-sindica-v3";
+const LS_KEY="vf-sindica-v5";
 const state={values:{},files:[],status:"rascunho",updatedAt:null};
 let db=null,assets=null,canWrite=false,saveTimer=null,saving=false,pending=false;
 const $=s=>document.querySelector(s);
